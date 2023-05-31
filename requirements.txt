@@ -1,0 +1,9 @@
+astropy
+enterprise_pulsar
+h5py
+libstempo
+numpy
+packaging
+pint_pulsar
+pyephem
+setuptools
