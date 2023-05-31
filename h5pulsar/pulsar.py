@@ -8,6 +8,7 @@ import logging
 import os
 import pickle
 from io import StringIO
+from typing import Optional
 
 import astropy.constants as const
 import astropy.units as u
@@ -17,6 +18,9 @@ from ephem import Ecliptic, Equatorial
 import enterprise
 from enterprise.signals import utils
 from enterprise.pulsar_inflate import PulsarInflater
+
+from h5pulsar.h5format import H5Format
+from h5pulsar import derivative_file
 
 logger = logging.getLogger(__name__)
 
@@ -318,11 +322,6 @@ class BasePulsar(object):
 
     def to_hdf5(self, h5path, fmt=None):
         """Save this object to an HDF5 format."""
-        try:
-            # Circular import if we're not careful
-            from h5pulsar import derivative_file
-        except ImportError as e:
-            raise ImportError("HDF5 library not available; consider installing h5py") from e
         if fmt is None:
             fmt = derivative_file.derivative_format()
         # Save MJDI, MJDF to retain full accuracy without longdouble
@@ -669,6 +668,22 @@ class Tempo2Pulsar(BasePulsar):
                     getattr(psr, attr).destroy()
 
             psr._deflated = "destroyed"
+
+
+# FIXME: format version?
+# Current format version could be set in this file
+# Reading a file with a version that might not be compatible should emit a warning
+class FilePulsar(BasePulsar):
+    """A Pulsar object created from the data in an HDF5 file."""
+
+    def __init__(self, h5path, sort=True, planets=True, fmt: Optional[H5Format] = None):
+        """Build a FilePulsar from an HDF5 file."""
+        if fmt is None:
+            fmt = derivative_file.derivative_format()
+        fmt.load_from_hdf5(h5path, self)
+        self._sort = sort
+        self.sort_data()
+        self.planets = planets
 
 
 def Pulsar(*args, **kwargs):

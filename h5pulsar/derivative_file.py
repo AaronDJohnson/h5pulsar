@@ -457,19 +457,3 @@ def derivative_format(
         for entry in final_entries:
             f.add_entry(entry)
     return f
-
-
-# FIXME: format version?
-# Current format version could be set in this file
-# Reading a file with a version that might not be compatible should emit a warning
-class FilePulsar(BasePulsar):
-    """A Pulsar object created from the data in an HDF5 file."""
-
-    def __init__(self, h5path, sort=True, planets=True, fmt: Optional[H5Format] = None):
-        """Build a FilePulsar from an HDF5 file."""
-        if fmt is None:
-            fmt = derivative_format()
-        fmt.load_from_hdf5(h5path, self)
-        self._sort = sort
-        self.sort_data()
-        self.planets = planets
