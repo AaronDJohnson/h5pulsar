@@ -1,9 +1,7 @@
-astropy
-enterprise_pulsar
-h5py
-libstempo
-numpy
-packaging
-pint_pulsar
-pyephem
-setuptools
+astropy >=5.3
+enterprise_pulsar >=3.3.2
+h5py >=3.8.0
+libstempo >=2.4.5
+numpy >=1.24.3
+pint_pulsar >=0.9.5
+ephem >=4.1.4
