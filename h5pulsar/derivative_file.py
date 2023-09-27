@@ -181,6 +181,7 @@ def derivative_format(
         H5Entry(
             name="DM",
             attribute="_dm",
+            required=False,
             use_dataset=True,
             description="Best-fit dispersion measure, in pc/cm^3.",
             extra_attributes=dict(units="pc/cm3"),
