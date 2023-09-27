@@ -44,7 +44,7 @@ except ImportError:
 #    raise ImportError(err_msg)
 
 
-class BaseHdf5Pulsar(enterprise.pulsar.BasePulsar):
+class BasePulsar(enterprise.pulsar.BasePulsar):
     """Base class that implements the to_hdf5 functionality"""
 
     def to_hdf5(self, h5path, fmt=None):
@@ -68,14 +68,14 @@ class BaseHdf5Pulsar(enterprise.pulsar.BasePulsar):
         # FIXME: try/finally to remove mjdi/mjdf?
 
 
-class PintPulsar(enterprise.pulsar.PintPulsar, BaseHdf5Pulsar):
+class PintPulsar(enterprise.pulsar.PintPulsar, BasePulsar):
 
     def __init__(self, toas, model, sort=True, drop_pintpsr=True, planets=True):
 
         super().__init__(toas, model, sort=sort, drop_pintpsr=drop_pintpsr, planets=planets)
 
 
-class Tempo2Pulsar(enterprise.pulsar.Tempo2Pulsar, BaseHdf5Pulsar):
+class Tempo2Pulsar(enterprise.pulsar.Tempo2Pulsar, BasePulsar):
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class Tempo2Pulsar(enterprise.pulsar.Tempo2Pulsar, BaseHdf5Pulsar):
 # FIXME: format version?
 # Current format version could be set in this file
 # Reading a file with a version that might not be compatible should emit a warning
-class FilePulsar(BaseHdf5Pulsar):
+class FilePulsar(BasePulsar):
     """A Pulsar object created from the data in an HDF5 file."""
 
     def __init__(self, h5path, sort=True, planets=True, fmt: Optional[H5Format] = None):
