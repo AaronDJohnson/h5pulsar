@@ -24,6 +24,25 @@ from h5pulsar import derivative_file
 
 logger = logging.getLogger(__name__)
 
+try:
+    import libstempo as t2
+except ImportError:
+    logger.warning("libstempo not installed. Will use PINT instead.")  # pragma: no cover
+    t2 = None
+
+try:
+    import pint
+    from pint.models import TimingModel, get_model_and_toas
+    from pint.residuals import Residuals as resids
+    from pint.toa import TOAs
+except ImportError:
+    logger.warning("PINT not installed. Will use libstempo instead.")  # pragma: no cover
+    pint = None
+
+#if pint is None and t2 is None:
+#    err_msg = "Must have either PINT or libstempo timing package installed"
+#    raise ImportError(err_msg)
+
 
 class BaseHdf5Pulsar(enterprise.pulsar.BasePulsar):
     """Base class that implements the to_hdf5 functionality"""

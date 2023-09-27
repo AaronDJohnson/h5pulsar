@@ -423,6 +423,7 @@ def derivative_format(
             name="DMX",
             attribute="_dmx",
             use_dataset=True,
+            required=False,
             description="""\
                 DMX information. This describes a time-variable dispersion
                 measure to the pulsar using a piecewise-constant model.
