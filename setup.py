@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="h5pulsar",
-    version="0.0.1",
+    version="1.1.0",
     author="Rutger van Haasteren",
     author_email="rutger@vhaasteren.com",
     description="HDF5 read/write capabilities for Enterprise Pulsar objects",
