@@ -1,24 +1,17 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "h5pulsar"
-version = "1.1.0"
+dynamic = ["version"]
 authors = [
     {name="Rutger van Haasteren", email="rutger@vhaasteren.com"},
 ]
 description = "HDF5 read/write capabilities for Enterprise Pulsar objects"
 readme = "README.md"
 license = {file="LICENSE"}
-requires-python = ">=3.7"
-dependencies = [
-    "numpy>=1.16.3",
-    "astropy>=4.0,!=4.0.1,!=4.0.1.post1",
-    "enterprise-pulsar>=3.3.4",
-    "jplephem>=2.6",
-    "h5py>=3.9.0"
-]
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -28,3 +21,7 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/vhaasteren/h5pulsar"
 "Bug Tracker" = "https://github.com/vhaasteren/h5pulsar/issues"
+
+[tool.setuptools_scm]
+write_to = "h5pulsar/_version.py"
+write_to_template = "__version__ = '{version}'"
