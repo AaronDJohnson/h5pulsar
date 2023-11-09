@@ -9,7 +9,13 @@ pytest.importorskip("h5py", reason="h5py not available")
 import h5py  # noqa: E402
 import numpy as np  # noqa: E402
 
-from h5pulsar.h5format import H5Format, H5Entry, H5ConstantEntry, MissingAttribute, MissingName  # noqa: E402
+from h5pulsar.h5format import (
+    H5Format,
+    H5Entry,
+    H5ConstantEntry,
+    MissingAttribute,
+    MissingName,
+)  # noqa: E402
 
 
 @dataclass
@@ -42,7 +48,9 @@ def test_description_finale(simple_format: H5Format):
 
 
 def test_description_includes_entry(simple_format: H5Format):
-    simple_format.add_entry(H5Entry(name="an_entry", description="This is a sample entry."))
+    simple_format.add_entry(
+        H5Entry(name="an_entry", description="This is a sample entry.")
+    )
     assert "an_entry" in simple_format.description
 
 
@@ -217,7 +225,9 @@ def test_write_read_vector(
     simple_format.load_from_hdf5(h5path, recovered_thing)
 
     assert np.array_equal(recovered_thing.an_entry, thing.an_entry)
-    if isinstance(recovered_thing.an_entry, np.ndarray) and isinstance(thing.an_entry, np.ndarray):
+    if isinstance(recovered_thing.an_entry, np.ndarray) and isinstance(
+        thing.an_entry, np.ndarray
+    ):
         assert recovered_thing.an_entry.dtype == thing.an_entry.dtype
 
 
@@ -362,7 +372,9 @@ def test_write_read_dict_dataset(tmp_path: Path, simple_format: H5Format, value:
 def test_write_missing(simple_format, tmp_path):
     h5path = tmp_path / "test.hdf5"
     thing = Thing()
-    simple_format.add_entry(H5Entry(name="another_entry", description="", required=False))
+    simple_format.add_entry(
+        H5Entry(name="another_entry", description="", required=False)
+    )
     simple_format.save_to_hdf5(h5path, thing)
     # Should not raise an exception
 
@@ -380,7 +392,9 @@ def test_read_missing(simple_format, tmp_path):
     h5path = tmp_path / "test.hdf5"
     thing = Thing()
     simple_format.save_to_hdf5(h5path, thing)
-    simple_format.add_entry(H5Entry(name="another_entry", description="", required=False))
+    simple_format.add_entry(
+        H5Entry(name="another_entry", description="", required=False)
+    )
     another_thing = Thing()
     simple_format.load_from_hdf5(h5path, another_thing)
     assert not hasattr(another_thing, "another_entry")

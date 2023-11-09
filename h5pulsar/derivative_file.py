@@ -22,7 +22,12 @@ import numpy as np
 from astropy import constants as c
 from astropy import units as u
 
-from h5pulsar.h5format import H5Entry, H5Format, write_dict_to_hdf5, write_array_to_hdf5_dataset
+from h5pulsar.h5format import (
+    H5Entry,
+    H5Format,
+    write_dict_to_hdf5,
+    write_array_to_hdf5_dataset,
+)
 from enterprise.pulsar import BasePulsar
 
 logger = logging.getLogger(__name__)
@@ -99,10 +104,14 @@ def write_designmatrix(h5file, name, thing, attribute):
     """
     if attribute != "_designmatrix":
         raise ValueError(f"Trying to write {attribute} as if it were the design matrix")
-    new_dataset = write_array_to_hdf5_dataset(h5file, name=name, value=getattr(thing, attribute))
+    new_dataset = write_array_to_hdf5_dataset(
+        h5file, name=name, value=getattr(thing, attribute)
+    )
     if hasattr(thing, "designmatrix_units"):
         # T2Pulsar objects don't have this
-        write_unit_list(new_dataset, name="units", thing=thing, attribute="designmatrix_units")
+        write_unit_list(
+            new_dataset, name="units", thing=thing, attribute="designmatrix_units"
+        )
     new_dataset.attrs["labels"] = [str(f) for f in thing.fitpars]
     return new_dataset
 
@@ -158,7 +167,11 @@ def derivative_format(
         format_name=format_name,
         format_version=format_version,
     )
-    f.add_entry(H5Entry(name="Name", attribute="name", use_dataset=True, description="Pulsar name."))
+    f.add_entry(
+        H5Entry(
+            name="Name", attribute="name", use_dataset=True, description="Pulsar name."
+        )
+    )
     f.add_entry(
         H5Entry(
             name="RAJ",
@@ -306,7 +319,14 @@ def derivative_format(
                 """,
         )
     )
-    f.add_entry(H5Entry(name="Fit parameters", attribute="fitpars", use_dataset=True, description="Fitted parameters."))
+    f.add_entry(
+        H5Entry(
+            name="Fit parameters",
+            attribute="fitpars",
+            use_dataset=True,
+            description="Fitted parameters.",
+        )
+    )
     f.add_entry(
         H5Entry(
             name="Design matrix",

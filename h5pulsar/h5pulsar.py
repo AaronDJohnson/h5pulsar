@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 try:
     import libstempo as t2
 except ImportError:
-    logger.warning("libstempo not installed. Will use PINT instead.")  # pragma: no cover
+    logger.warning(
+        "libstempo not installed. Will use PINT instead."
+    )  # pragma: no cover
     t2 = None
 
 try:
@@ -36,10 +38,12 @@ try:
     from pint.residuals import Residuals as resids
     from pint.toa import TOAs
 except ImportError:
-    logger.warning("PINT not installed. Will use libstempo instead.")  # pragma: no cover
+    logger.warning(
+        "PINT not installed. Will use libstempo instead."
+    )  # pragma: no cover
     pint = None
 
-#if pint is None and t2 is None:
+# if pint is None and t2 is None:
 #    err_msg = "Must have either PINT or libstempo timing package installed"
 #    raise ImportError(err_msg)
 
@@ -69,14 +73,13 @@ class BasePulsar(enterprise.pulsar.BasePulsar):
 
 
 class PintPulsar(enterprise.pulsar.PintPulsar, BasePulsar):
-
     def __init__(self, toas, model, sort=True, drop_pintpsr=True, planets=True):
-
-        super().__init__(toas, model, sort=sort, drop_pintpsr=drop_pintpsr, planets=planets)
+        super().__init__(
+            toas, model, sort=sort, drop_pintpsr=drop_pintpsr, planets=planets
+        )
 
 
 class Tempo2Pulsar(enterprise.pulsar.Tempo2Pulsar, BasePulsar):
-
     def __init__(
         self,
         t2pulsar,
@@ -86,8 +89,14 @@ class Tempo2Pulsar(enterprise.pulsar.Tempo2Pulsar, BasePulsar):
         par_name=None,
         tim_name=None,
     ):
-
-        super().__init__(t2pulsar, sort=sort, drop_t2pulsar=drop_t2pulsar, planets=planets, par_name=par_name, tim_name=tim_name)
+        super().__init__(
+            t2pulsar,
+            sort=sort,
+            drop_t2pulsar=drop_t2pulsar,
+            planets=planets,
+            par_name=par_name,
+            tim_name=tim_name,
+        )
 
 
 # FIXME: format version?
@@ -126,16 +135,24 @@ def Pulsar(*args, **kwargs):
         t2pulsar = [x for x in args if isinstance(x, t2.tempopulsar)]
 
     parfile = [x for x in args if isinstance(x, str) and x.split(".")[-1] == "par"]
-    timfile = [x for x in args if isinstance(x, str) and x.split(".")[-1] in ["tim", "toa"]]
+    timfile = [
+        x for x in args if isinstance(x, str) and x.split(".")[-1] in ["tim", "toa"]
+    ]
 
     if pint and toas and model:
-        return PintPulsar(toas[0], model[0], sort=sort, drop_pintpsr=drop_pintpsr, planets=planets)
+        return PintPulsar(
+            toas[0], model[0], sort=sort, drop_pintpsr=drop_pintpsr, planets=planets
+        )
     elif t2 and t2pulsar:
-        return Tempo2Pulsar(t2pulsar[0], sort=sort, drop_t2pulsar=drop_t2pulsar, planets=planets)
+        return Tempo2Pulsar(
+            t2pulsar[0], sort=sort, drop_t2pulsar=drop_t2pulsar, planets=planets
+        )
     elif parfile and timfile:
         # Check whether the two files exist
         if not os.path.isfile(parfile[0]) or not os.path.isfile(timfile[0]):
-            msg = "Cannot find parfile {0} or timfile {1}!".format(parfile[0], timfile[0])
+            msg = "Cannot find parfile {0} or timfile {1}!".format(
+                parfile[0], timfile[0]
+            )
             raise IOError(msg)
 
         # Obtain the directory name of the timfile, and change to it
@@ -150,7 +167,9 @@ def Pulsar(*args, **kwargs):
             elif pint is not None:
                 timing_package = "pint"
             else:
-                raise ValueError("No timing package available with which to load a pulsar")
+                raise ValueError(
+                    "No timing package available with which to load a pulsar"
+                )
 
         # get current directory
         cwd = os.getcwd()
@@ -163,7 +182,9 @@ def Pulsar(*args, **kwargs):
                     raise ValueError("tempo2 requested but tempo2 is not available")
                 # hack to set maxobs
                 maxobs = get_maxobs(reltimfile) + 100
-                t2pulsar = t2.tempopulsar(relparfile, reltimfile, maxobs=maxobs, ephem=ephem, clk=clk)
+                t2pulsar = t2.tempopulsar(
+                    relparfile, reltimfile, maxobs=maxobs, ephem=ephem, clk=clk
+                )
                 return Tempo2Pulsar(
                     t2pulsar,
                     sort=sort,
@@ -178,10 +199,16 @@ def Pulsar(*args, **kwargs):
                 if (clk is not None) and (bipm_version is None):
                     bipm_version = clk.split("(")[1][:-1]
                 model, toas = get_model_and_toas(
-                    relparfile, reltimfile, ephem=ephem, bipm_version=bipm_version, planets=planets
+                    relparfile,
+                    reltimfile,
+                    ephem=ephem,
+                    bipm_version=bipm_version,
+                    planets=planets,
                 )
                 os.chdir(cwd)
-                return PintPulsar(toas, model, sort=sort, drop_pintpsr=drop_pintpsr, planets=planets)
+                return PintPulsar(
+                    toas, model, sort=sort, drop_pintpsr=drop_pintpsr, planets=planets
+                )
             else:
                 raise ValueError(f"Unknown timing package {timing_package}")
         finally:
