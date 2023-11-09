@@ -13,7 +13,6 @@ setup(
     description="HDF5 read/write capabilities for Enterprise Pulsar objects",
     license="MIT",
     long_description=open("README.md").read(),
-    url="https://github.com/vhaasteren/h5pulsar",
     include_package_data=True,
     zip_safe=False,
     classifiers=[
