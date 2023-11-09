@@ -108,7 +108,7 @@ jobs:
           cd tmp2
           python -m venv venv-wheel
           venv-wheel/bin/python -m pip install --upgrade pip setuptools
-          venv-sdist/bin/python -m pip install -r ../requirements.txt
+          venv-wheel/bin/python -m pip install -r ../requirements.txt
           venv-wheel/bin/python -m pip install ../dist/h5pulsar*.whl
           venv-wheel/bin/python -c "import h5pulsar;print(h5pulsar.__version__)"
       - uses: actions/upload-artifact@v3
