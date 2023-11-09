@@ -2,5 +2,5 @@ numpy>=1.26.1
 astropy>=4.0,!=4.0.1,!=4.0.1.post1
 #enterprise-pulsar>=3.3.4
 git+https://github.com/vhaasteren/enterprise.git@pulsar_mods#egg=enterprise-pulsar
-jplephem>=2.6
+#jplephem>=2.6
 h5py>=3.9.0
