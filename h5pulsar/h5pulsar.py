@@ -18,6 +18,7 @@ from ephem import Ecliptic, Equatorial
 import enterprise
 from enterprise.signals import utils
 from enterprise.pulsar_inflate import PulsarInflater
+from enterprise.pulsar import get_maxobs
 
 from h5pulsar.h5format import H5Format
 from h5pulsar import derivative_file
