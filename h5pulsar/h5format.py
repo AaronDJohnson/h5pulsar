@@ -136,8 +136,12 @@ class H5Entry:
         attribute = self.name if self.attribute is None else self.attribute
         if not hasattr(thing, attribute):
             if self.required:
-                raise MissingAttribute(f"Attribute {attribute} needed for HDF5 {self.name} missing from {thing}")
-            logger.debug(f"Not writing {self.name} because attribute {attribute} is missing")
+                raise MissingAttribute(
+                    f"Attribute {attribute} needed for HDF5 {self.name} missing from {thing}"
+                )
+            logger.debug(
+                f"Not writing {self.name} because attribute {attribute} is missing"
+            )
             return
         if self.write is not None:
             n = self.write(h5file, self.name, thing, attribute)
@@ -153,21 +157,29 @@ class H5Entry:
             elif isinstance(value, str):
                 new_item = write_string_to_hdf5_dataset(h5file, self.name, value)
             else:
-                new_item = write_array_to_hdf5_dataset(h5file, self.name, np.asarray(value))
+                new_item = write_array_to_hdf5_dataset(
+                    h5file, self.name, np.asarray(value)
+                )
             new_item.attrs["Description"] = shorten(self.description, 256)
             if self.extra_attributes is not None:
                 new_item.attrs.update(self.extra_attributes)
         else:
             if isinstance(value, np.ndarray) and value.dtype.kind == "U":
                 if len(value.shape) != 1:
-                    raise ValueError("Cannot store multidimentsional string arrays in HDF5 attributes: {value.shape}")
+                    raise ValueError(
+                        "Cannot store multidimentsional string arrays in HDF5 attributes: {value.shape}"
+                    )
                 value = [str(v) for v in value]
             try:
                 h5file.attrs[self.name] = value
             except TypeError as e:
-                raise TypeError(f"Invalid type for storage in an attribute: {type(value)}") from e
+                raise TypeError(
+                    f"Invalid type for storage in an attribute: {type(value)}"
+                ) from e
             if self.extra_attributes is not None:
-                raise ValueError(f"Cannot apply extra attributes to attribute: {self.extra_attributes}")
+                raise ValueError(
+                    f"Cannot apply extra attributes to attribute: {self.extra_attributes}"
+                )
 
     def read_from_hdf5(self, h5file: h5py.File, thing):
         """Read this entry from an HDF5 file.
@@ -185,7 +197,9 @@ class H5Entry:
         if self.name not in (h5file if self.use_dataset else h5file.attrs):
             if self.required:
                 raise MissingName(f"Entry {self.name} missing from HDF5")
-            logger.debug(f"Not reading {attribute} because attribute {self.name} is missing")
+            logger.debug(
+                f"Not reading {attribute} because attribute {self.name} is missing"
+            )
             return
         if self.read is not None:
             return self.read(h5file, self.name, thing, attribute)
@@ -198,7 +212,11 @@ class H5Entry:
                     value = decode_array_dataset_if_necessary(value)
             else:
                 value = h5file.attrs[self.name]
-                if isinstance(value, np.ndarray) and value.dtype == "O" and len(value.shape) == 1:
+                if (
+                    isinstance(value, np.ndarray)
+                    and value.dtype == "O"
+                    and len(value.shape) == 1
+                ):
                     value = list(value)
         except KeyError:
             if self.required:
@@ -263,7 +281,9 @@ class H5ConstantEntry(H5Entry):
         super().write_description(f, extra_tags=tags)
 
 
-def write_array_to_hdf5_dataset(h5group: h5py.Group, name: str, value: np.ndarray) -> h5py.Dataset:
+def write_array_to_hdf5_dataset(
+    h5group: h5py.Group, name: str, value: np.ndarray
+) -> h5py.Dataset:
     """Write an array to an HDF5 dataset.
 
     For numeric arrays, this just creates a dataset and saves the value.
@@ -312,7 +332,9 @@ def write_array_to_hdf5_dataset(h5group: h5py.Group, name: str, value: np.ndarra
     return d
 
 
-def write_string_to_hdf5_dataset(h5group: h5py.Group, name: str, value: str) -> h5py.Dataset:
+def write_string_to_hdf5_dataset(
+    h5group: h5py.Group, name: str, value: str
+) -> h5py.Dataset:
     """Write a string to an HDF5 dataset.
 
     This is for writing single, long, Python strings; it splits them at
@@ -359,7 +381,9 @@ def write_dict_to_hdf5(h5group: h5py.Group, name: str, d: dict) -> h5py.Group:
     g = h5group.create_group(name, track_order=True)
     for k, v in d.items():
         if k == "Description":
-            raise ValueError("The value `Description` is special to h5format and cannot be stored in dictionaries.")
+            raise ValueError(
+                "The value `Description` is special to h5format and cannot be stored in dictionaries."
+            )
         if isinstance(v, dict):
             write_dict_to_hdf5(g, k, v)
         elif isinstance(v, np.ndarray):
@@ -379,7 +403,11 @@ def read_dict_from_hdf5(h5group: h5py.Group) -> dict:
     r = dict(h5group.attrs)
     r.pop("Description", None)
     for k, v in h5group.items():
-        r[k] = read_dict_from_hdf5(v) if isinstance(v, h5py.Group) else decode_array_dataset_if_necessary(v)
+        r[k] = (
+            read_dict_from_hdf5(v)
+            if isinstance(v, h5py.Group)
+            else decode_array_dataset_if_necessary(v)
+        )
     return r
 
 
@@ -439,8 +467,12 @@ class H5Format:
                 )
             )
         if self.format_version is not None:
-            if not isinstance(packaging.version.parse(self.format_version), packaging.version.Version):
-                raise ValueError(f"Unable to parse format_version {self.format_version}")
+            if not isinstance(
+                packaging.version.parse(self.format_version), packaging.version.Version
+            ):
+                raise ValueError(
+                    f"Unable to parse format_version {self.format_version}"
+                )
             self.entries.append(
                 H5ConstantEntry(
                     name="format_version",
@@ -490,7 +522,10 @@ class H5Format:
             with h5py.File(h5, "w", track_order=True) as f:
                 return self.save_to_hdf5(f, thing)
         H5ConstantEntry(
-            name="README", description="A text description of the format.", use_dataset=True, value=self.description
+            name="README",
+            description="A text description of the format.",
+            use_dataset=True,
+            value=self.description,
         ).write_to_hdf5(h5, thing)
         for entry in self.entries:
             entry.write_to_hdf5(h5, thing)
@@ -519,7 +554,10 @@ class H5Format:
                 return self.load_from_hdf5(f, thing)
         for entry in self.entries:
             entry.read_from_hdf5(h5, thing)
-        if self.format_name is not None and getattr(thing, "format_name") != self.format_name:
+        if (
+            self.format_name is not None
+            and getattr(thing, "format_name") != self.format_name
+        ):
             logger.warning(
                 f"Apparently different formats: file is in format "
                 f"{getattr(thing, 'format_name')} while this reader expects "

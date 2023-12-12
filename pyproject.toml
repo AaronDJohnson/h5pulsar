@@ -1,29 +1,27 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "h5pulsar"
-version = "1.0.2"
+dynamic = ["version"]
 authors = [
-  { name="Anne Archibald", email=""},
-  { name="Aaron Johnson", email="aaron.johnson@nanograv.org" },
-  { name="Michele Vallisneri", email="" },
+    {name="Rutger van Haasteren", email="rutger@vhaasteren.com"},
 ]
-description = "Fork of Anne Archibald's code to add hdf5 to Pulsar objects"
+description = "HDF5 read/write capabilities for Enterprise Pulsar objects"
 readme = "README.md"
-requires-python = ">=3.9"
+license = {file="LICENSE"}
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dynamic = ["dependencies"]
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
-"Homepage" = "https://github.com/AaronDJohnson/h5pulsar"
+"Homepage" = "https://github.com/vhaasteren/h5pulsar"
+"Bug Tracker" = "https://github.com/vhaasteren/h5pulsar/issues"
 
-
+[tool.setuptools_scm]
+write_to = "h5pulsar/_version.py"
+write_to_template = "__version__ = '{version}'"

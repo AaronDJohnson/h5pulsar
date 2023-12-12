@@ -1,0 +1,147 @@
+name: Python package CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [published]
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.9', '3.10']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install non-python dependencies on mac
+        if: runner.os == 'macOS'
+        run: |
+          brew unlink gcc && brew link gcc
+          brew install automake suite-sparse
+          curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh
+        shell: bash
+      - name: Install non-python dependencies on linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install libsuitesparse-dev
+          curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh
+        shell: bash
+      - name: Install dependencies and package
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install "numpy>=1.26.1" --only-binary=numpy
+          python -m pip install black pytest pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        shell: bash
+      - name: Display Python, pip, setuptools, and all installed versions
+        run: |
+          python -c "import sys; print(f'Python {sys.version}')"
+          python -c "import pip; print(f'pip {pip.__version__}')"
+          python -c "import setuptools; print(f'setuptools {setuptools.__version__}')"
+          python -m pip freeze
+      - name: Lint with black
+        run: |
+          black . --check
+      - name: Install package in editable mode
+        run: pip install -e .
+        shell: bash
+      - name: Run tests with pytest
+        run: |
+          pytest --cov=h5pulsar --cov-report xml:coverage.xml tests/
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+
+  build:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      - name: Install non-python dependencies on linux
+        run: |
+          sudo apt-get install libsuitesparse-dev
+          curl -sSL https://raw.githubusercontent.com/vallis/libstempo/master/install_tempo2.sh | sh
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel setuptools_scm
+      - name: Build source distribution and wheel
+        run: |
+          python -m pip install "numpy>=1.26.1" --only-binary=numpy
+          python -m pip install -r requirements.txt
+          python -m pip install --upgrade build
+          python -m build --sdist --wheel --outdir dist/
+      - name: Test deployability
+        run: |
+          pip install twine
+          twine check dist/*
+      - name: Test the sdist
+        run: |
+          mkdir tmp  
+          cd tmp
+          python -m venv venv-sdist
+          venv-sdist/bin/python -m pip install --upgrade pip setuptools wheel
+          venv-sdist/bin/python -m pip install -r ../requirements.txt
+          venv-sdist/bin/python -m pip install ../dist/h5pulsar*.tar.gz
+          venv-sdist/bin/python -c "import h5pulsar;print(h5pulsar.__version__)"
+      - name: Test the wheel
+        run: |
+          mkdir tmp2  
+          cd tmp2
+          python -m venv venv-wheel
+          venv-wheel/bin/python -m pip install --upgrade pip setuptools
+          venv-wheel/bin/python -m pip install -r ../requirements.txt
+          venv-wheel/bin/python -m pip install ../dist/h5pulsar*.whl
+          venv-wheel/bin/python -c "import h5pulsar;print(h5pulsar.__version__)"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/*
+
+  deploy:
+    needs: [tests, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      - name: Download wheel/dist from build
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+      - name: Publish to PyPI
+        run: |
+          python -m pip install --upgrade twine
+          python -m twine upload ./dist/*
+        env:
+          TWINE_USERNAME: __token__
+          #TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          #TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
